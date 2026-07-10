@@ -9,7 +9,7 @@ promoting them to `gpu-app-collection-public`.
 raunaks_kernels/
 ├── gpgpusim.config   # Volta TITAN V (SM70) — GPGPU-Sim picks this up from CWD
 ├── Makefile          # Builds any .cu file in this directory
-├── run.sh            # One-shot compile + simulate under GPGPU-Sim
+├── run.sh            # One-shot compile + run under GPGPU-Sim or on silicon
 ├── vector_add.cu     # Starter example
 └── README.md
 ```
@@ -34,17 +34,47 @@ make
 The Makefile compiles for `compute_70 / sm_70` (Volta PTX) so GPGPU-Sim can
 simulate it correctly.
 
-### 3. Run under GPGPU-Sim
+### 3. Run (simulator or silicon)
+
+`run.sh` runs a kernel either under GPGPU-Sim or on a real GPU. Pass `sim` or
+`silicon` as the second argument to pick the target:
 
 ```bash
-./run.sh my_kernel [optional args]
+./run.sh <design> sim        # run <design> under GPGPU-Sim
+./run.sh <design> silicon    # run <design> on real GPU hardware
 ```
 
-`run.sh` will:
+Full form (the mode defaults to `sim` if omitted):
+
+```bash
+./run.sh <kernel_name> [sim|silicon] [kernel args...]
+```
+
+| Command | Where it runs |
+|---------|---------------|
+| `./run.sh my_kernel`          | GPGPU-Sim (default) |
+| `./run.sh my_kernel sim`      | GPGPU-Sim (explicit) |
+| `./run.sh my_kernel silicon`  | Real GPU hardware (no simulator) |
+| `./run.sh my_kernel sim 1024` | GPGPU-Sim + kernel arg `1024` |
+
+Examples with the `bar_sync` test kernel:
+
+```bash
+./run.sh bar_sync            # simulate the bar.sync barrier under GPGPU-Sim
+./run.sh bar_sync silicon    # run the same binary on a real GPU to compare
+```
+
+**Simulator mode (`sim`, default)** — `run.sh` will:
 1. Build the binary if missing or stale.
-2. Set `LD_LIBRARY_PATH` to point at GPGPU-Sim's intercepting `libcudart.so`.
-3. `cd` into this directory so `gpgpusim.config` is in the CWD.
+2. `source` GPGPU-Sim's `setup_environment`, which points `LD_LIBRARY_PATH`
+   at the intercepting `libcudart.so`.
+3. `cd` into this directory so `gpgpusim.config` is picked up from the CWD.
 4. Execute the binary — GPGPU-Sim takes over and simulates execution.
+
+**Silicon mode (`silicon`)** — `run.sh` strips any GPGPU-Sim paths out of
+`LD_LIBRARY_PATH` so the *real* CUDA runtime is used, then executes the binary
+directly on the GPU. Use this to sanity-check that a kernel produces the same
+result on hardware as it does in the simulator (`gpgpusim.config` is ignored).
 
 ### 4. Promote a validated kernel
 
