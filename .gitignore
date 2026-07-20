@@ -1,0 +1,42 @@
+# ── Kernel executables from `make` / `make KERNEL=<name>` ────────────────────
+# Builds produce extensionless binaries next to each *.cu. Ignore everything
+# by default, then re-include sources, configs, docs, and tooling.
+*
+!*/
+!*.*
+!.gitignore
+!Makefile
+
+# ── nvcc / CUDA intermediate and object products ─────────────────────────────
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.so.*
+*.dylib
+*.dll
+*.cubin
+*.fatbin
+*.fatbin.c
+*.ptx
+*.ptxas
+*.sass
+*.reg
+*.module_id
+*.i
+*.ii
+*.gpu
+*.cu.cpp
+*.cudafe*
+*.cpp1.ii
+*.cpp4.ii
+*.hash
+*.d
+
+# ── Editor / OS noise ────────────────────────────────────────────────────────
+*~
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
